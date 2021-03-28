@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block container %}
+
+<main class="container mt-3">
+
+    <section>
+        <div class="text-center">
+            <img class="my-3 img-fluid rounded-circle" src="{{ profile.avatar.url }}" width="200" height="200" alt="">
+        </div>
+        <p class="mt-4 text-center font-weight-light">Full name</p>
+        <p class="text-center" style="font-size:20px">{{ profile.full_name }}</p>
+        <p class="mt-4 text-center font-weight-light">Bio</p>
+        <p class="text-center" style="font-size:20px">{{ profile.bio }}</p>
+    </section>
+
+    {% if profile.user == request.user %}
+
+    <div class="text-center">
+        <a href="{% url 'edit_profile' user.username %}">
+            <button type="button" class="my-4 btn btn-secondary">
+                Edit profile
+            </button>
+        </a>
+    </div>
+    {% else %}
+
+    {% if following|length == 0 %}
+    <div class="text-center">
+        <a href="{% url 'profile' profile.user.username %}?action=follow">
+            <button type="button" class="my-4 btn btn-info">
+                Follow
+            </button>
+        </a>
+    </div>
+    {% else %}
+    <div class="text-center">
+        <a href="{% url 'profile' profile.user.username %}?action=unfollow">
+            <button type="button" class="my-4 btn btn-light">
+                Unfollow
+            </button>
+        </a>
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+    <div class="text-center">
+        <a href="{% url 'following' profile.user.username %}">
+            <button type="button" class="m-4 btn btn-primary">
+                Following
+            </button>
+        </a>
+
+        <a href="{% url 'followers' profile.user.username %}">
+            <button type="button" class="m-4 btn btn-primary">
+                Followers
+            </button>
+        </a>
+    </div>
+
+    <section>
+        <div>
+            <div class="m-5 row">
+                {% for post in posts %}
+                <div class="col-md-4">
+                    <img src="{{ post.image.url }}" width="300" alt="">
+                    <p class="mt-2 font-weight-light">{{ post.published_at }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+</main>
+
+{% endblock %}
