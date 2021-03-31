@@ -47,3 +47,25 @@ class Follower(models.Model):
 
     def __str__(self):
         return f'{self.user_id} follows {self.following_user_id}'
+
+
+class Like(models.Model):
+    profile_id = models.ForeignKey(Profile, related_name="user_likes", on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name="liked_post", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.profile_id} likes {self.post.description}'
+
+    @classmethod
+    def like(cls, current_profile, post):
+        like, created = cls.objects.get_or_create(
+            profile_id=current_profile,
+            post=post
+        )
+
+    @classmethod
+    def unlike(cls, current_profile, post):
+        unlike = cls.objects.filter(
+            profile_id=current_profile,
+            post=post
+        ).delete()

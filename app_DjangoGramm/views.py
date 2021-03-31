@@ -1,15 +1,38 @@
+import json
+
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.db.models import Q, Count, Exists, Case, When
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView
 
 from app_DjangoGramm.forms import RegisterForm, LoginForm, ProfileForm, PostForm
-from app_DjangoGramm.models import Post, Profile, User, Follower
+from app_DjangoGramm.models import Post, Profile, User, Follower, Like
+
+
+@login_required
+def like(request, post_id):
+    if request.method == 'POST':
+        liking = Like.objects.filter(profile_id=request.user.profile, post=post_id)
+        if liking:
+            is_liking = True
+        else:
+            is_liking = False
+        if is_liking:
+            Like.unlike(request.user.profile, post_id)
+            is_liking = False
+        else:
+            Like.like(request.user.profile, post_id)
+            is_liking = True
+        resp = {'liking': is_liking}
+        response = json.dumps(resp)
+        return HttpResponse(response, content_type="application/json")
+    return HttpResponseRedirect(reverse('main'))
 
 
 class MainView(LoginRequiredMixin, View):
@@ -17,7 +40,16 @@ class MainView(LoginRequiredMixin, View):
 
     def get(self, request):
         my_following = Follower.objects.filter(user_id=request.user).values('following_user_id')
-        posts = Post.objects.filter(Q(user__in=my_following) | Q(user=request.user)).order_by('-id')
+        posts = Post.objects.filter(Q(user__in=my_following) | Q(user=request.user)).order_by('-id').\
+            annotate(amount_likes=Count('liked_post'), is_liking=Exists(Like.objects.filter(profile_id=request.user.profile)))
+        # extended_posts = []
+        # for post in posts:
+        #     liking = Like.objects.filter(profile_id=request.user.profile, post=post)
+        #     extended_post = {
+        #         'post': post,
+        #         'is_liking': liking
+        #     }
+        #     extended_posts.append(extended_post)
         context = {
             'posts': posts,
             'title': 'Main'
@@ -25,21 +57,38 @@ class MainView(LoginRequiredMixin, View):
         return render(request, 'main.html', context=context)
 
 
+@login_required
+def follow(request, username):
+    if request.method == 'POST':
+        following_user = User.objects.get(username=username)
+        following = Follower.objects.filter(user_id=request.user, following_user_id=following_user)
+        if following:
+            is_following = True
+        else:
+            is_following = False
+        if is_following:
+            Follower.unfollow(request.user, following_user)
+            is_following = False
+        else:
+            Follower.follow(request.user, following_user)
+            is_following = True
+        resp = {'following': is_following}
+        response = json.dumps(resp)
+        return HttpResponse(response, content_type="application/json")
+    return HttpResponseRedirect(reverse('profile', args=(username,)))
+
+
 class ProfileView(LoginRequiredMixin, View):
     login_url = 'login'
 
     def get(self, request, username):
-        action = request.GET.get('action')
-        following_user = User.objects.get(username=username)
-        if action == "follow":
-            Follower.follow(request.user, following_user)
-        elif action == "unfollow":
-            Follower.unfollow(request.user, following_user)
-        is_following = Follower.objects.filter(user_id=request.user, following_user_id=following_user)
+
         if username == request.user.username:
             profile, created = Profile.objects.get_or_create(user=request.user)
         else:
             profile = get_object_or_404(Profile, user__username=username)
+        following_user = User.objects.get(username=username)
+        is_following = Follower.objects.filter(user_id=request.user, following_user_id=following_user)
         posts = Post.objects.filter(user__username=username).order_by('-id')
         context = {
             'profile': profile,

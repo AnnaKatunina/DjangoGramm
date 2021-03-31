@@ -25,23 +25,14 @@
     </div>
     {% else %}
 
-    {% if following|length == 0 %}
-    <div class="text-center">
-        <a href="{% url 'profile' profile.user.username %}?action=follow">
-            <button type="button" class="my-4 btn btn-info">
-                Follow
-            </button>
-        </a>
+
+
+    <div class="text-center my-4">
+        <a type="button"
+           {% if following %} class="btn btn-light" {% else %} class="btn btn-info" {% endif %}
+           id="follow-button"
+           href="{% url 'follow' profile.user.username %}">{% if following %}Unfollow{% else %}Follow{% endif %}</a>
     </div>
-    {% else %}
-    <div class="text-center">
-        <a href="{% url 'profile' profile.user.username %}?action=unfollow">
-            <button type="button" class="my-4 btn btn-light">
-                Unfollow
-            </button>
-        </a>
-    </div>
-    {% endif %}
 
     {% endif %}
 
@@ -73,5 +64,26 @@
     </section>
 
 </main>
+{% endblock container %}
 
-{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    $('#follow-button').click(function () {
+        var href = this.href;
+        $.ajax({
+            type: "POST",
+            contentType: 'application/json',
+            url: href,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            dataType: "json",
+            success: function (response) {
+                if (response['following']) {
+                    $('#follow-button').html("Unfollow").toggleClass('btn btn-light');
+                } else {
+                    $('#follow-button').html("Follow").toggleClass('btn btn-info');
+                }
+            }
+        })
+    })
+</script>
+{% endblock scripts %}
