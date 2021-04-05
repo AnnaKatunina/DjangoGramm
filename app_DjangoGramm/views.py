@@ -4,8 +4,8 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db.models import Q, Count, Exists, Case, When
-from django.http import HttpResponseRedirect, HttpResponse
+from django.db.models import Q, Count
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -16,22 +16,29 @@ from app_DjangoGramm.models import Post, Profile, User, Follower, Like
 
 
 @login_required
-def like(request, post_id):
+def like(request):
     if request.method == 'POST':
-        liking = Like.objects.filter(profile_id=request.user.profile, post=post_id)
+        post_id = request.POST.get('post_id')
+        post = Post.objects.get(id=post_id)
+        liking = Like.objects.filter(profile_id=request.user.profile, post=post)
+        count_likes = len(Like.objects.filter(post=post))
         if liking:
             is_liking = True
         else:
             is_liking = False
         if is_liking:
-            Like.unlike(request.user.profile, post_id)
+            Like.unlike(request.user.profile, post)
             is_liking = False
+            count_likes -= 1
         else:
-            Like.like(request.user.profile, post_id)
+            Like.like(request.user.profile, post)
             is_liking = True
-        resp = {'liking': is_liking}
-        response = json.dumps(resp)
-        return HttpResponse(response, content_type="application/json")
+            count_likes += 1
+        data = {
+            'value': is_liking,
+            'count_likes': count_likes,
+        }
+        return JsonResponse(data, safe=False)
     return HttpResponseRedirect(reverse('main'))
 
 
@@ -41,17 +48,12 @@ class MainView(LoginRequiredMixin, View):
     def get(self, request):
         my_following = Follower.objects.filter(user_id=request.user).values('following_user_id')
         posts = Post.objects.filter(Q(user__in=my_following) | Q(user=request.user)).order_by('-id').\
-            annotate(amount_likes=Count('liked_post'), is_liking=Exists(Like.objects.filter(profile_id=request.user.profile)))
-        # extended_posts = []
-        # for post in posts:
-        #     liking = Like.objects.filter(profile_id=request.user.profile, post=post)
-        #     extended_post = {
-        #         'post': post,
-        #         'is_liking': liking
-        #     }
-        #     extended_posts.append(extended_post)
+            annotate(amount_likes=Count('liked_post'))
+        likes = Like.objects.filter(profile_id=request.user.profile).select_related('post')
+        liked_posts = [like.post for like in likes]
         context = {
             'posts': posts,
+            'liked_posts': liked_posts,
             'title': 'Main'
         }
         return render(request, 'main.html', context=context)
@@ -89,11 +91,14 @@ class ProfileView(LoginRequiredMixin, View):
             profile = get_object_or_404(Profile, user__username=username)
         following_user = User.objects.get(username=username)
         is_following = Follower.objects.filter(user_id=request.user, following_user_id=following_user)
-        posts = Post.objects.filter(user__username=username).order_by('-id')
+        posts = Post.objects.filter(user__username=username).order_by('-id').annotate(amount_likes=Count('liked_post'))
+        likes = Like.objects.filter(profile_id=profile).select_related('post')
+        liked_posts = [like.post for like in likes]
         context = {
             'profile': profile,
             'posts': posts,
             'following': is_following,
+            'liked_posts': liked_posts,
             'title': 'My profile',
         }
         return render(request, 'profile.html', context=context)

@@ -5,7 +5,7 @@ from app_DjangoGramm.views import MainView, RegisterView, MyLoginView, ProfileVi
 
 urlpatterns = [
     path('', MainView.as_view(), name='main'),
-    path('like/<post_id>/', like, name='like'),
+    path('like/', like, name='like'),
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', MyLoginView.as_view(), name='login'),
     path('logout/', MyLogoutView.as_view(), name='logout'),

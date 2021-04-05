@@ -4,7 +4,7 @@
 
 <main class="container center-block">
 
-    <section class="mt-5 pt-3">
+    <section class="my-5 pt-3">
 
         <div class="text-center">
             <a href="{% url 'new_post' %}">
@@ -24,25 +24,31 @@
                         <p class="ml-2 mt-3">{{ post.user.profile.full_name }}</p></a>
                 </div>
                 <img src="{{ post.image.url }}" width="800" alt="">
-                <p class="card-text mt-3">{{ post.description }}</p>
-                <div class="form-inline">
-                <p class="mt-1 font-weight-light">{{ post.published_at }}</p>
                 <div class="container">
-                    <div class="row">
-                        <div class="col-4 ml-auto mr-3">
-                            <p class="mt-1 mx-2 font-weight-normal">{{ post.amount_likes }}</p>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <p class="font-weight-light">{{ post.published_at }}</p>
                         </div>
-                        <div class="col-4 mr-auto ml-3">
-                            {% if post.is_liking %}
-                            <button type="button" class="btn btn-outline-danger btn-sm mx-2">Liked</button>
-                            {% else %}
-                            <button type="button" class="btn btn-outline-primary btn-sm mx-2">Like</button>
-                            {% endif %}
+                        <div class="col text-right">
+                            <form action="{% url 'like' %}" method="POST" class="like-form" id="{{ post.id }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="post_id" value="{{ post.id }}">
+                                <div class="row text-right">
+                                    <div class="col-9">
+                                        <p class="btn_count{{ post.id }} font-weight-normal">{{ post.amount_likes }}</p>
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="submit"
+                                                class="btn_like{{ post.id }} btn btn-outline-{% if post in liked_posts %}danger{% else %}primary{% endif %} btn-sm">
+                                            {% if post in liked_posts %}Liked{% else %}Like{% endif %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-                    </div>
-
+                <p class="ml-3 card-text">{{ post.description }}</p>
             </div>
         </div>
         {% endfor %}
@@ -51,3 +57,39 @@
 
 </main>
 {% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.like-form').submit(function (e){
+            e.preventDefault()
+            const post_id = $(this).attr('id')
+            const like_text = $.trim($(`.btn_like${ post_id }`).text())
+            const url = $(this).attr('action')
+            let res;
+            const likes = parseInt($(`.btn_count${ post_id }`).text())
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'post_id': post_id,
+                },
+                success: function (response) {
+                    if(like_text === 'Liked') {
+                        $(`.btn_like${ post_id }`).text('Like').toggleClass('btn btn-outline-danger btn-sm btn btn-outline-primary btn-sm')
+                        res = likes - 1
+                    } else {
+                        $(`.btn_like${ post_id }`).text('Liked').toggleClass('btn btn-outline-primary btn-sm btn btn-outline-danger btn-sm')
+                        res = likes + 1
+                    }
+                    $(`.btn_count${ post_id }`).text(res)
+                }
+            })
+
+        })
+    });
+
+</script>
+{% endblock scripts %}

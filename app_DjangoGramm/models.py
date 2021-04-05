@@ -1,3 +1,4 @@
+from cloudinary.models import CloudinaryField
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -14,7 +15,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=64, blank=True)
     bio = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to='avatars', default='avatars/default_avatar.png')
+    avatar = CloudinaryField('avatar', default='image/upload/v1617642447/fqdfojw0ave5mhozuc3r.png')
 
     def __str__(self):
         return f'{self.full_name}'
@@ -22,7 +23,7 @@ class Profile(models.Model):
 
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='images')
+    image = CloudinaryField('image')
     description = models.TextField(blank=True)
     published_at = models.DateField(auto_now_add=True)
 
