@@ -19,6 +19,8 @@ import cloudinary.uploader
 import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from secret_keys import SECRET_KEY, CLOUD_NAME, API_KEY, API_SECRET
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -26,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '7ixwx6tf9l-65i(6+e=^6&a^g!zcb-cwewtn83ii5&y5aw$)o%'
+SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -136,7 +138,7 @@ LOGIN_REDIRECT_URL = 'main'
 LOGOUT_REDIRECT_URL = 'login'
 
 cloudinary.config(
-    cloud_name="dkpmlltlh",
-    api_key="513299592733476",
-    api_secret="6_0ZCao4-SQm4UooiuO89l3bZno"
+    cloud_name=CLOUD_NAME,
+    api_key=API_KEY,
+    api_secret=API_SECRET
 )

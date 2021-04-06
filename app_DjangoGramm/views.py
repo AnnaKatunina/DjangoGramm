@@ -23,10 +23,6 @@ def like(request):
         liking = Like.objects.filter(profile_id=request.user.profile, post=post)
         count_likes = len(Like.objects.filter(post=post))
         if liking:
-            is_liking = True
-        else:
-            is_liking = False
-        if is_liking:
             Like.unlike(request.user.profile, post)
             is_liking = False
             count_likes -= 1
@@ -65,10 +61,6 @@ def follow(request, username):
         following_user = User.objects.get(username=username)
         following = Follower.objects.filter(user_id=request.user, following_user_id=following_user)
         if following:
-            is_following = True
-        else:
-            is_following = False
-        if is_following:
             Follower.unfollow(request.user, following_user)
             is_following = False
         else:

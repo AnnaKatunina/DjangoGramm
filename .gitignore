@@ -2,4 +2,6 @@
 venv
 .pytest_cache
 
+secret_keys.py
+
 *.pyc
