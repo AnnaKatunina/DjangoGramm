@@ -142,3 +142,7 @@ cloudinary.config(
     api_key=API_KEY,
     api_secret=API_SECRET
 )
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
