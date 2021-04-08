@@ -1,5 +1,6 @@
 .idea
 venv
+node_modules
 .pytest_cache
 
 secret_keys.py

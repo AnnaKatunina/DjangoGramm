@@ -142,3 +142,5 @@ cloudinary.config(
     api_key=API_KEY,
     api_secret=API_SECRET
 )
+
+STATICFILES_DIRS = ['dist']
