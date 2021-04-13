@@ -16,6 +16,13 @@
 
             </form>
             <div class="mt-4 text-center"><p>Don't have an account? <a href="/register">Sign up!</a></p></div>
+
+        <ul>
+            <li><a href="{% url 'social:begin' 'github' %}">Sign in with GitHub</a></li>
+<!--            <li><a href="{% url 'social:begin' 'google' %}">Sign in with Google</a></li>-->
+        </ul>
+
+
         </div>
     </div>
 </main>

@@ -13,6 +13,7 @@ from django.views.generic import CreateView
 
 from app_DjangoGramm.forms import RegisterForm, LoginForm, ProfileForm, PostForm
 from app_DjangoGramm.models import Post, Profile, User, Follower, Like
+from project_DjangoGramm.settings import LOGIN_REDIRECT_URL
 
 
 @login_required
