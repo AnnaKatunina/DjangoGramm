@@ -1,7 +1,7 @@
 from django.urls import path, include
 
 from app_DjangoGramm.views import MainView, RegisterView, MyLoginView, ProfileView, MyLogoutView, EditProfileView, \
-    FollowersView, FollowingView, PostView, follow, like
+    FollowersView, FollowingView, PostView, follow, like, SearchView
 
 urlpatterns = [
     path('', MainView.as_view(), name='main'),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('profile/<username>/following/', FollowingView.as_view(), name='following'),
     path('new_post/', PostView.as_view(), name='new_post'),
     path('social_auth/', include('social_django.urls', namespace='social')),
+    path('search/', SearchView.as_view(), name='search'),
 ]

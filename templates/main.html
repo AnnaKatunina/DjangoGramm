@@ -4,8 +4,15 @@
 
 <main class="container center-block">
 
-    <section class="my-5 pt-3">
-
+        <form action="{% url 'search' %}" method="get"  class="form-inline mx-5 mt-5" enctype="multipart/form-data">
+            <div class="form-group col-8 col-md-10 pl-0">
+              <input name="s" class="form-control w-100" type="search" placeholder="Search" aria-label="Search">
+            </div>
+            <div class="form-group col-4 col-md-2 pl-0">
+              <button class="btn btn-outline-info w-100" type="submit">Search</button>
+            </div>
+        </form>
+    <section class="mb-5 mt-3">
         <div class="text-center">
             <a href="{% url 'new_post' %}">
                 <button type="button" class="my-4 btn btn-info">

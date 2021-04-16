@@ -169,6 +169,20 @@ class PostView(LoginRequiredMixin, View):
         return render(request, 'new_post.html', {'form': post_form})
 
 
+class SearchView(LoginRequiredMixin, View):
+    login_url = 'login'
+
+    def get(self, request):
+        query = request.GET.get('s')
+        found_users = Profile.objects.filter(full_name__icontains=query)
+        context = {
+            'found_users': found_users,
+            'query': query,
+            'title': 'Search'
+        }
+        return render(request, 'search.html', context=context)
+
+
 class MyLoginView(LoginView):
     form_class = LoginForm
     redirect_authenticated_user = True

@@ -11,17 +11,26 @@ class BasicTestCase(TestCase):
         self.client = Client()
         self.user_1 = User.objects.create(username='test_user_1', email='testemail_1@test.com', password='password_1')
         self.user_2 = User.objects.create(username='test_user_2', email='testemail_2@test.com', password='password_2')
-        self.profile_1 = Profile.objects.create(user=self.user_1, full_name='Test User 1', bio='Hi!I\'m test user 1')
-        self.profile_2 = Profile.objects.create(user=self.user_2, full_name='Test User 2', bio='Hi!I\'m test user 2')
+        self.profile_1 = Profile.objects.filter(user=self.user_1).update(full_name='Test User 1', bio='Hi!I\'m test user 1')
+        self.profile_2 = Profile.objects.filter(user=self.user_2).update(full_name='Test User 2', bio='Hi!I\'m test user 2')
         self.post = Post.objects.create(
             user=self.user_1,
-            image=SimpleUploadedFile('Image', content=b'', content_type='image/jpg'),
+            image='https://res.cloudinary.com/dkpmlltlh/image/upload/v1617642447/fqdfojw0ave5mhozuc3r.png',
             description='My test post'
         )
         self.follower = Follower.objects.create(user_id=self.user_2, following_user_id=self.user_1)
 
 
 class ModelTestCase(BasicTestCase):
+
+    def test_user_model_has_profile(self):
+        user = User(
+            username='user_user_test',
+            email='user_user_test@user.com',
+            password='user_user_1234'
+        )
+        user.save()
+        self.assertTrue(hasattr(user, 'profile'))
 
     def test_models(self):
         test_user = User.objects.get(username='test_user_1')
