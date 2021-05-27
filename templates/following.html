@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block container %}
+
+<main class="container mt-3">
+
+    <section>
+        {% for follower in following %}
+        <div class="ml-5">
+            <div class="form-inline text-center">
+                <img class="my-3 img-fluid rounded-circle" src="{{ follower.following_user_id.profile.avatar.url }}"
+                     width="50" alt="">
+                <a class="text-dark" href="{% url 'profile' follower.following_user_id.username %}">
+                    <p class="ml-3 mt-3" style="font-size:20px">{{ follower.following_user_id.profile.full_name }}</p>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+
+</main>
+
+{% endblock %}
